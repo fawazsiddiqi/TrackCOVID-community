@@ -42,7 +42,7 @@ This can be easily deployed to Heroku as follows:
 - `SERVER_DOMAIN`: The domain where the server will be hosted (should be the same as `APP_DOMAIN` in production)
 - `ABOUT_URL`: A web address where people can learn more about your project
 - `APP_THEME`: Specify either `dark` or `light` depending on how you want your app to look.
-- `ESTIMATED_DX_DELAY_DAYS`: How many days prior to check for possible contacts (e.g. 7 for one week). Should be guided by advice of public health experts.
+- `QUARANTINE_DAYS`: How many days after contact to alert people of potential exposure, i.e. number of days to quarantine (for example, 14). Should be set according to public health guidelines.
 - `CONTACT_WINDOW_HOURS_BEFORE`: How many hours before an exposed checkpoint occurred for others that scanned the same checkpoint to be considered a contact
 - `CONTACT_WINDOW_HOURS_AFTER`: How many hours after an exposed checkpoint occurred for others that scanned the same checkpoint to be considered a contact
 - `MONGODB_URI`: The mongodb database URL. (This will be automatically set in Heroku if you use the [mLab](https://elements.heroku.com/addons/mongolab) addon.)
@@ -75,6 +75,15 @@ The admin module will also be built when you run `npm install` from the server (
 
 ## Additional setup
 
+### Setting up Sendgrid
+
+The admin dashboard uses [Sendgrid](https://sendgrid.com/) for account management (sending users their initial password, and password resets). You can create a free account, which will allow you to send 40,000 emails for the first 30 days, then 100/day after that.
+
+1. Create your free [Sendgrid](https://sendgrid.com/) account
+1. In Sendgrid, verify the "from" email address you will be using (needs to match the "from" email address in step 4). [Instructions here](https://sendgrid.com/docs/ui/sending-email/sender-verification).
+1. Copy your API key from Sendgrid (It should start with the letters `SG`). Set the environment variable `SENDGRID_API_KEY` to this value.
+1. Set the environment variable `ADMIN_EMAIL_FROM` to the email address to use as the "from" email address for automated account management emails (e.g. password reset emails). Emails will appear as having been sent from this address in users' email inboxes.
+
 ### Creating your first admin user
 
 You can create your first admin user by running the following from the root directory of this project: `npm run create-user`. This will prompt you for your mongodb url, desired username, and password. Be sure to use the appropriate mongodb url depending on whether you are trying to create a user in your production database or your local database. Also, if you're using Heroku and mLab, make sure to include `&retryWrites=false` at the end of the mongodb url.
@@ -83,4 +92,4 @@ Once this user is created, you can log in to the admin panel using these credent
 
 ### Scheduling job to clean database
 
-Data that is older than the period of time set by `ESTIMATED_DX_DELAY_DAYS` is no longer needed or useful and should be deleted. This can be done by running `node clean-database.js` from the root of the project. To continually clean the database, this should be scheduled as a job. On Heroku, this can be easily done using the [Heroku Scheduler addon](https://devcenter.heroku.com/articles/scheduler). Just create a job for the command `node clean-database.js` and have it execute either every hour or every day, depending on how often you want the cleaning to occur.
+Data that is older than the period of time set by `QUARANTINE_DAYS` is no longer needed or useful and should be deleted. This can be done by running `node clean-database.js` from the root of the project. To continually clean the database, this should be scheduled as a job. On Heroku, this can be easily done using the [Heroku Scheduler addon](https://devcenter.heroku.com/articles/scheduler). Just create a job for the command `node clean-database.js` and have it execute either every hour or every day, depending on how often you want the cleaning to occur.
